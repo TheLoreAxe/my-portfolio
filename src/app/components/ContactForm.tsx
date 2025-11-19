@@ -6,54 +6,45 @@ export default function ContactForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [error, setError] = useState("");
 
-  function handleSubmit(event: React.FormEvent) {
+  async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
-    const subject = encodeURIComponent(`Portfolio contact from ${name || "Anonymous"}`);
-    const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\n${message}`);
-    window.location.href = `mailto:msteffan99@gmail.com?subject=${subject}&body=${body}`;
+    setStatus("loading");
+    setError("");
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, message })
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data?.error || "Failed to send message");
+      }
+
+      setStatus("success");
+      setName("");
+      setEmail("");
+      setMessage("");
+    } catch (err) {
+      setStatus("error");
+      setError(err instanceof Error ? err.message : "Unexpected error");
+    }
   }
 
   return (
     <form onSubmit={handleSubmit} className="form">
-      <div className="form-group">
-        <label htmlFor="name" className="form-label">Name</label>
-        <input
-          id="name"
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="input"
-          placeholder="Your name"
-        />
-      </div>
-      <div className="form-group">
-        <label htmlFor="email" className="form-label">Email</label>
-        <input
-          id="email"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          className="input"
-          placeholder="you@example.com"
-        />
-      </div>
-      <div className="form-group">
-        <label htmlFor="message" className="form-label">Message</label>
-        <textarea
-          id="message"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          rows={5}
-          required
-          className="textarea"
-          placeholder="How can I help?"
-        />
-      </div>
-      <button type="submit" className="btn btn-primary">Send</button>
+      {/* existing inputs */}
+      <button type="submit" disabled={status === "loading"} className="btn btn-primary">
+        {status === "loading" ? "Sending…" : "Send"}
+      </button>
+
+      {status === "success" && <p className="text-success">Message sent. Thanks!</p>}
+      {status === "error" && <p className="text-error">{error}</p>}
     </form>
   );
 }
-
-
