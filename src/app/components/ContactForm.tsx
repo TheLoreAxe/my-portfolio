@@ -2,11 +2,14 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence, useAnimation } from "framer-motion";
-import planeImg from "../assets/airplane.png"; 
+import airplaneImg from '@/app/assets/airplane.png';
 
 type SubmitStatus = "idle" | "sending" | "success" | "error";
 
-// --- CSS ---
+/**
+ * Global styles to override browser-specific autofill styling.
+ * Ensures the dark theme aesthetics are maintained even when browser autofills inputs.
+ */
 const globalStyles = `
   input:-webkit-autofill,
   input:-webkit-autofill:hover, 
@@ -23,6 +26,7 @@ const globalStyles = `
   }
 `;
 
+// Utility to get element coordinates relative to the viewport
 const getRect = (element: HTMLElement | null) => {
   if (!element) return { x: 0, y: 0, width: 0, height: 0, centerX: 0, centerY: 0 };
   const rect = element.getBoundingClientRect();
@@ -57,22 +61,27 @@ export default function ContactForm() {
   const [error, setError] = useState("");
   const [floatingChars, setFloatingChars] = useState<FloatingChar[]>([]);
   
-  const controls = useAnimation();
+  // Animation controls
+  const buttonControls = useAnimation();
+  const planeControls = useAnimation();
+
+  const flightPath = "M0,0 C450,-75 300,-400 100,-400 C-200,-350 -300,300 1200,-600";
+  
   const inputRefs = useRef<{ [key: string]: HTMLInputElement | HTMLTextAreaElement | null }>({});
   const buttonRef = useRef<HTMLButtonElement>(null);
 
-  // --- SCROLL LOCK ---
+  // Lock horizontal scroll during animation to prevent layout shifts from the flying element
   useEffect(() => {
     if (status === "sending") {
-      document.body.style.overflow = "hidden";
-      document.documentElement.style.overflow = "hidden";
+      document.body.style.overflowX = "hidden";
+      document.documentElement.style.overflowX = "hidden";
     } else {
-      document.body.style.overflow = "";
-      document.documentElement.style.overflow = "";
+      document.body.style.overflowX = "";
+      document.documentElement.style.overflowX = "";
     }
     return () => {
-      document.body.style.overflow = "";
-      document.documentElement.style.overflow = "";
+      document.body.style.overflowX = "";
+      document.documentElement.style.overflowX = "";
     };
   }, [status]);
 
@@ -87,7 +96,8 @@ export default function ContactForm() {
     const btnRect = getRect(buttonRef.current);
     setStatus("sending");
 
-    // --- 1. OPTIMIZED PARTICLE GENERATION ---
+    // 1. Particle Generation
+    // Breaks input values into floating characters that converge on the button.
     const chars: FloatingChar[] = [];
     const createParticles = (key: keyof typeof formData) => {
       const el = inputRefs.current[key];
@@ -95,18 +105,14 @@ export default function ContactForm() {
       const rect = getRect(el);
       const text = formData[key];
       
-      // OPTIMIZATION: If text is long, only take a sample of letters
-      // We limit to max ~30 particles per field to prevent lag
+      // Sampling strategy for performance optimization
       const MAX_PARTICLES_PER_FIELD = 30;
       const step = Math.ceil(text.length / MAX_PARTICLES_PER_FIELD);
 
       for (let i = 0; i < text.length; i += step) {
         const char = text[i];
-        // Calculate position based on character index approximation
-        // (This is a rough visual approximation to keep performance high)
         const randomOffsetX = (Math.random() - 0.5) * (rect.width * 0.9); 
         const randomOffsetY = (Math.random() - 0.5) * (rect.height * 0.6);
-
         chars.push({
           id: `${key}-${i}-${Date.now()}`,
           char,
@@ -118,35 +124,38 @@ export default function ContactForm() {
       }
     };
 
-    createParticles("name");
-    createParticles("company");
-    createParticles("email");
-    createParticles("message");
-
+    Object.keys(formData).forEach((k) => createParticles(k as keyof typeof formData));
     setFloatingChars(chars);
 
-    // --- 2. ANIMATION SEQUENCE ---
-    
-    // Fade out red button bg
-    controls.start({
+    // 2. Initial Animation State
+    // Hide button, show plane, and start particle convergence.
+    buttonControls.start({
       backgroundColor: "rgba(255,255,255,0)",
       boxShadow: "none", 
       transition: { duration: 0.5 }
     });
 
-    // Wait for letters (1s)
+    planeControls.start({
+      opacity: 1,
+      transition: { duration: 0.5 }
+    });
+
+    // Await particle convergence duration
     await new Promise(resolve => setTimeout(resolve, 1000));
     setFloatingChars([]); 
 
-    // Fly Plane
-    await controls.start({
-      x: window.innerWidth, 
-      y: -window.innerHeight, 
-      opacity: 0,
-      transition: { duration: 1.5, ease: "easeInOut" }
+    // 3. Flight Animation
+    // Animates offsetDistance along the SVG path defined in `flightPath`.
+    await planeControls.start({
+      offsetDistance: "100%",
+      opacity: 0, 
+      transition: { 
+        duration: 4, 
+        ease: "easeInOut" 
+      }
     });
 
-    // API Call
+    // 4. Data Submission & Cleanup
     try {
       const response = await fetch("/api/contact", {
         method: "POST",
@@ -162,18 +171,17 @@ export default function ContactForm() {
 
       setFormData({ name: "", company: "", email: "", message: "" });
       
-      // Wait a moment
+      // Delay for UX feel before resetting
       await new Promise(resolve => setTimeout(resolve, 500)); 
 
-      // Reset Position Invisibly
-      controls.set({ x: 0, y: 0, opacity: 0 });
+      // Silent reset of plane position
+      planeControls.set({ offsetDistance: "0%", opacity: 0 });
 
-      // Reset State
       setStatus("success");
       setTimeout(() => setStatus("idle"), 10);
 
-      // Fade Button Back In
-      await controls.start({
+      // Restore button state
+      await buttonControls.start({
         opacity: 1,
         backgroundColor: "#dc2626",
         boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
@@ -182,8 +190,11 @@ export default function ContactForm() {
 
     } catch (err) {
       setStatus("error");
-      setError("Something went wrong.");
-      controls.set({ x: 0, y: 0, opacity: 1, backgroundColor: "#dc2626", boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)" });
+      setError(err instanceof Error ? err.message : String(err));
+      
+      // Error state recovery
+      planeControls.set({ offsetDistance: "0%", opacity: 0 });
+      buttonControls.set({ opacity: 1, backgroundColor: "#dc2626", boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)" });
     }
   };
 
@@ -193,7 +204,7 @@ export default function ContactForm() {
     <div className="relative w-full max-w-lg mx-auto">
       <style>{globalStyles}</style>
 
-      {/* FLOATING LETTERS */}
+      {/* Particle Rendering Layer */}
       <AnimatePresence>
         {floatingChars.map((item) => (
           <motion.span
@@ -219,54 +230,52 @@ export default function ContactForm() {
       </AnimatePresence>
 
       <form onSubmit={handleAnimationAndSubmit} className="form space-y-4">
-        <div className="form-group">
-          <label htmlFor="name" className="form-label text-white">Name*</label>
-          <input
-            ref={(el) => { inputRefs.current["name"] = el; }}
-            id="name" type="text" value={formData.name} onChange={handleChange} required placeholder="Your name" readOnly={status !== "idle"}
-            className={`input ${isTextHidden ? "animating-hidden" : ""}`}
-            style={{ color: isTextHidden ? "transparent" : "inherit" }}
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="company" className="form-label text-white">Company</label>
-          <input
-            ref={(el) => { inputRefs.current["company"] = el; }}
-            id="company" type="text" value={formData.company} onChange={handleChange} placeholder="Company" readOnly={status !== "idle"}
-            className={`input ${isTextHidden ? "animating-hidden" : ""}`}
-            style={{ color: isTextHidden ? "transparent" : "inherit" }}
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="email" className="form-label text-white">Email*</label>
-          <input
-            ref={(el) => { inputRefs.current["email"] = el; }}
-            id="email" type="email" value={formData.email} onChange={handleChange} required placeholder="you@example.com" readOnly={status !== "idle"}
-            className={`input ${isTextHidden ? "animating-hidden" : ""}`}
-            style={{ color: isTextHidden ? "transparent" : "inherit" }}
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="message" className="form-label text-white">Message*</label>
-          <textarea
-            ref={(el) => { inputRefs.current["message"] = el; }}
-            id="message" value={formData.message} onChange={handleChange} rows={5} required placeholder="How can I help?" readOnly={status !== "idle"}
-            className={`textarea ${isTextHidden ? "animating-hidden" : ""}`}
-            style={{ color: isTextHidden ? "transparent" : "inherit" }}
-          />
-        </div>
+        {["name", "company", "email", "message"].map((field) => (
+           <div className="form-group" key={field}>
+             <label htmlFor={field} className="form-label text-white capitalize">
+               {field}
+               {field !== "company" && "*"}
+             </label>
+             {field === "message" ? (
+               <textarea
+                 ref={(el) => { inputRefs.current[field] = el; }}
+                 id={field}
+                 value={formData[field as keyof typeof formData]}
+                 onChange={handleChange}
+                 rows={5}
+                 required
+                 placeholder={field === "message" ? "How can I help?" : ""}
+                 readOnly={status !== "idle"}
+                 className={`textarea ${isTextHidden ? "animating-hidden" : ""}`}
+                 style={{ color: isTextHidden ? "transparent" : "inherit" }}
+               />
+             ) : (
+               <input
+                 ref={(el) => { inputRefs.current[field] = el; }}
+                 id={field}
+                 type={field === "email" ? "email" : "text"}
+                 value={formData[field as keyof typeof formData]}
+                 onChange={handleChange}
+                 required={field !== "company"}
+                 placeholder={field === "name" ? "Your name" : field === "email" ? "you@example.com" : "Company"}
+                 readOnly={status !== "idle"}
+                 className={`input ${isTextHidden ? "animating-hidden" : ""}`}
+                 style={{ color: isTextHidden ? "transparent" : "inherit" }}
+               />
+             )}
+           </div>
+        ))}
 
-        {/* BUTTON AREA */}
+        {/* Submit Button & Flight Container */}
         <div className="flex justify-center pt-4 relative z-10 h-20 items-center">
           <motion.button
             ref={buttonRef}
             type="submit"
             disabled={status !== "idle"}
-            animate={controls}
+            animate={buttonControls}
             className="relative flex items-center justify-center rounded-md btn btn-primary"
             style={{ minWidth: "150px", minHeight: "50px" }}
           >
-            {/* TEXT */}
             <motion.span 
               className="text-white font-semibold"
               animate={{ opacity: status === "sending" ? 0 : 1 }}
@@ -275,23 +284,30 @@ export default function ContactForm() {
               Send Message
             </motion.span>
 
-            {/* PLANE - Updated Transition Logic */}
+            {/* Plane Icon with Motion Path Animation */}
             <motion.div
-              className="absolute inset-0 flex items-center justify-center"
+              animate={planeControls}
+              className="absolute left-1/2 top-1/2"
+              style={{ 
+                x: "-50%", 
+                y: "-50%", 
+                offsetPath: status === "sending" ? `path("${flightPath}")` : "none",
+                offsetRotate: status === "sending" ? "auto 0deg" : "0deg",
+                offsetAnchor: "50% 50%",
+              }}
               initial={{ opacity: 0 }}
-              animate={{ opacity: status === "sending" ? 1 : 0 }}
-              // FIX: Instant fade out (0 duration) when state is NOT sending
-              transition={{ duration: status === "sending" ? 0.5 : 0 }}
             >
-               <img 
-                 src={planeImg.src} 
+               <img
+                 src={typeof airplaneImg === "string" ? airplaneImg : airplaneImg.src}
                  alt="Sending..." 
-                 className="w-16 h-16 object-contain" 
+                 width={48}
+                 height={48}
+                 className="object-contain"
+                 style={{ transform: "rotate(30deg)" }}
                />
             </motion.div>
           </motion.button>
         </div>
-        
         <div className="h-8 text-center"> 
           {status === "error" && <p className="text-red-400 font-medium">{error}</p>}
         </div>

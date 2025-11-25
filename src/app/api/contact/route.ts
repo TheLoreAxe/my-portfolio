@@ -47,7 +47,6 @@ export async function POST(request: Request) {
         pass: gmailAppPass,
       },
     });
-    // return NextResponse.json({ success: true, message: 'Email sent successfully' }, { status: 200 }); // TODO: Remove this line
     await transporter.sendMail({
       from: `"${name}" <${email}>`,
       to: gmailUser,
