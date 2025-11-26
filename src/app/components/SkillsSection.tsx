@@ -8,7 +8,13 @@ export default function SkillsSection() {
         <li>Node.js</li>
         <li>Python</li>
         <li>HTML / CSS</li>
-        <li>SQL / NoSQL</li>
+        <li>Java</li>
+        <li>C#</li>
+        <li>Oracle</li>
+        <li>MSQL</li>
+        <li>SQL Server</li>
+        <li>Automation</li>
+        <li>ASP.NET</li>
       </ul>
     </section>
   );
