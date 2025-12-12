@@ -18,6 +18,11 @@ export default function SkillsSection() {
         <li>SQL Server</li>
         <li>Automation</li>
         <li>ASP.NET</li>
+        <li>Docker</li>
+        <li>Swift</li>
+        <li>GIT</li>
+        <li>Rest APIs</li>
+        <li>C/AL</li>
       </ul>
     </section>
   );

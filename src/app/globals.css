@@ -521,7 +521,7 @@ blockquote.quote-container.twinkling::after {
   max-height: 0;
   overflow: hidden;
   text-align: left;
-  transition: opacity 2000ms ease, max-height 2000ms ease, margine-top 2000ms ease, padding-bottom 300ms ease;
+  transition: opacity 2000ms ease, max-height 1000ms ease, margine-top 500ms ease, padding-bottom 300ms ease;
 }
 
 .experience-item:hover .experience-meta {
