@@ -41,8 +41,7 @@ export default function AboutSection() {
       <h1 className="section-title section-title--lg accent">About Me</h1>
       <p className="about-intro">Hi! I&apos;m Matthew!<br /><br />
       I am a software Developer with a love of automation and problem solving. I believe 
-      in the power of technology to solve real-world problems and improve efficiency by creating the most user friendly environment. 
-      One of my favorite past times is finding ways to make life easier for myself and my wonderful family. 
+      in the power of technology to solve real-world problems and improve efficiency by creating the most user friendly environment.  
       <br /><br /> Welcome to my portfolio!</p>
       
       <motion.blockquote
