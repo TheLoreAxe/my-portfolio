@@ -252,9 +252,10 @@ html {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  padding-top: 70px;
 }
 .section--skills {
-  min-height: 50vh;
+  min-height: 40vh;
   display: flex;
   flex-direction: column;
 }
@@ -718,5 +719,134 @@ blockquote.quote-container.twinkling::after {
   opacity: 0.9;
 }
 .btn-primary:active {
+  opacity: 0.8;
+}
+
+/* Projects Section */
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.projects-grid .project-card--portrait {
+  grid-column: span 1;
+}
+
+.projects-grid .project-card--landscape {
+  grid-column: span 1;
+}
+
+.project-card {
+  background: var(--background);
+  border: 1px solid #52525b;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  transition: transform 150ms ease, box-shadow 150ms ease;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+}
+
+.project-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.project-image {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.project-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 150ms ease;
+}
+
+.project-card:hover .project-image img {
+  transform: scale(1.05);
+}
+
+.project-content {
+  padding: 1.5rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.project-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--foreground);
+}
+
+.project-description {
+  color: var(--foreground);
+  opacity: 0.8;
+  margin-bottom: 1rem;
+  flex: 1;
+}
+
+.project-tech {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.tech-tag {
+  background: rgba(224, 17, 34, 0.1);
+  color: var(--accent);
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* Technology-specific colors */
+.tech-javascript { background: rgba(247, 223, 30, 0.15); color: #f7df1e; border-color: rgba(247, 223, 30, 0.2); }
+.tech-typescript { background: rgba(45, 121, 199, 0.15); color: #5fa4f7; border-color: rgba(45, 121, 199, 0.2); }
+.tech-react { background: rgba(97, 218, 251, 0.15); color: #61dafb; }
+.tech-nextjs { background: rgba(255, 255, 255, 0.1); color: #ededed; border-color: rgba(255, 255, 255, 0.2); }
+.tech-nodejs { background: rgba(108, 194, 74, 0.15); color: #83cd29; }
+.tech-python { background: rgba(255, 212, 59, 0.1); color: #5a9fd4; }
+.tech-html { background: rgba(255, 87, 34, 0.15); color: #ff6d40; }
+.tech-css { background: rgba(33, 150, 243, 0.15); color: #4dadf7; }
+.tech-java { background: rgba(248, 152, 29, 0.15); color: #f89820; }
+.tech-csharp { background: rgba(23, 134, 0, 0.15); color: #4e9b00; border-color: rgba(23, 134, 0, 0.3); }
+.tech-oracle { background: rgba(248, 0, 0, 0.15); color: #ff4d4d; }
+.tech-mysql { background: rgba(0, 117, 143, 0.15); color: #4db3ce; }
+.tech-sqlserver { background: rgba(169, 179, 195, 0.15); color: #b0c4de; }
+.tech-automation { background: rgba(255, 165, 0, 0.15); color: #ffbd4a; }
+.tech-aspnet { background: rgba(81, 43, 212, 0.15); color: #a78bf0; }
+.tech-docker { background: rgba(36, 150, 237, 0.15); color: #46a2f2; }
+.tech-swift { background: rgba(240, 81, 56, 0.15); color: #ff6b4a; }
+.tech-git { background: rgba(240, 80, 51, 0.15); color: #f36c56; }
+.tech-restapis { background: rgba(168, 168, 168, 0.15); color: #cfcfcf; }
+.tech-cal { background: rgba(0, 123, 193, 0.15); color: #4db5f0; }
+.tech-tailwindcss { background: rgba(56, 189, 248, 0.15); color: #38bdf8; }
+.tech-postgresql { background: rgba(51, 103, 145, 0.15); color: #699ecb; }
+.tech-mongodb { background: rgba(71, 162, 81, 0.15); color: #58aa50; }
+.tech-aws { background: rgba(255, 153, 0, 0.15); color: #ffb347; }
+.tech-vercel { background: rgba(255, 255, 255, 0.1); color: #ffffff; border-color: rgba(255, 255, 255, 0.3); }
+
+.project-links {
+  display: flex;
+  gap: 1rem;
+}
+
+.project-link {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+  transition: opacity 150ms ease;
+}
+
+.project-link:hover {
   opacity: 0.8;
 }
