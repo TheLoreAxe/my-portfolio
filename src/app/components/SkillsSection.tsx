@@ -3,11 +3,14 @@ export default function SkillsSection() {
     <section id="skills" className="section section--skills">
       <h2 className="section-title section-title--md accent">Skills</h2>
       <ul className="skills-list">
-        <li>JavaScript / TypeScript</li>
-        <li>React & Next.js</li>
+        <li>JavaScript</li>
+        <li>TypeScript</li>
+        <li>React</li>
+        <li>Next.js</li>
         <li>Node.js</li>
         <li>Python</li>
-        <li>HTML / CSS</li>
+        <li>HTML</li>
+        <li>CSS</li>
         <li>Java</li>
         <li>C#</li>
         <li>Oracle</li>

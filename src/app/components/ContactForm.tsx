@@ -328,8 +328,8 @@ export default function ContactForm() {
               <Image
                 src={airplaneImg} // The Image component handles both strings and import objects automatically
                 alt="Sending..."
-                width={48}
-                height={48}
+                width={100}
+                height={100}
                 className="object-contain"
                 style={{ transform: "rotate(30deg)" }}
               />
