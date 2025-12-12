@@ -145,7 +145,7 @@ export default function ContactForm() {
 
     planeControls.start({
       opacity: 1,
-      transition: { duration: 0.5 },
+      transition: { duration: 0.5 }
     });
 
     // Await particle convergence duration
@@ -316,8 +316,8 @@ export default function ContactForm() {
               animate={planeControls}
               className="absolute left-1/2 top-1/2"
               style={{
-                x: "-50%",
-                y: "-50%",
+                x: "-20%",
+                y: "-20%",
                 offsetPath:
                   status === "sending" ? `path("${flightPath}")` : "none",
                 offsetRotate: status === "sending" ? "auto 0deg" : "0deg",
@@ -328,8 +328,8 @@ export default function ContactForm() {
               <Image
                 src={airplaneImg} // The Image component handles both strings and import objects automatically
                 alt="Sending..."
-                width={48}
-                height={48}
+                width={100}
+                height={100}
                 className="object-contain"
                 style={{ transform: "rotate(30deg)" }}
               />
